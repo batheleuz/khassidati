@@ -1,0 +1,233 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ 'css/simple-sidebar.css' }}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.css"/>
+    <style>
+        .loader {
+            border: 5px solid #cac8cd;
+            border-radius: 50%;
+            border-top: 5px solid #3498db;
+            width: 30px;
+            height: 30px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="d-flex" id="wrapper">
+
+        <!-- Sidebar -->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">Khassidati </div>
+            <div class="list-group list-group-flush">
+                <a href="#" onclick="javascript:switchPage('khassidaList', 'addKhassida');" class="list-group-item list-group-item-action bg-light">Khassaides</a>
+                <a href="#" onclick="javascript:switchPage( 'addKhassida', 'khassidaList');" class="list-group-item list-group-item-action bg-light">Add</a>
+            </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Logout </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div id="addKhassida" class="container-fluid pt-4" >
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data"  id="add_khassida">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select name="type" class="form-control">
+                                    <option value="khassaide">Khassaide</option>
+                                    <option value="coran">Quran</option>
+                                    <option value="autre">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleForm">name</label>
+                                <input name="name" type="text" class="form-control" placeholder="Ahbabtou">
+                            </div>
+                            <div class="form-group">
+                                <label>Pdf file</label>
+                                <input name="pdf" type="file" id="file" accept="application/pdf" class="form-control-file">
+                            </div>
+                            <div id="error"></div>
+                            <div>
+                                <div class="float-left">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                                <div class="float-right">
+                                    <div id="addFileLoader" class="loader" style="display:none;"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="khassidaList" class="container-fluid pt-4" style="display: none;">
+                <table id="table_id" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>type</th>
+                        <th>name</th>
+                        <th>fileUrl</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/jq-3.3.1/dt-1.10.20/datatables.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+        var app_url = "{{ app_url }}";
+
+        var table = $('#table_id').DataTable({
+            ajax: {
+                url: '{{ path('app_khassidati_pdfs') }}',
+                dataSrc: 'pdfs'
+            },
+            columns: [
+                { data: 'type' },
+                { data: 'name' },
+                {
+                    data: 'fileUrl',
+                    render: function ( data, type, row ) {
+                        return '<a href="' +app_url + data +'" target="_blank"> ' + data + ' </a> ';
+                    }
+                },
+                {
+                    data: 'id',
+                    render: function ( data, type, row ) {
+                        return '<button class="btn btn-sm btn-danger rm_'+data+'" onclick="javascript:removeKhassida('+data+')"> remove </button>';
+                    }
+                }
+            ]
+        });
+
+        var switchPage = function(open, close) {
+            $("#" + open).css('display', 'block');
+            $("#" + close).css('display', 'none');
+
+            if (open === 'khassidaList') {
+                table.ajax.reload();
+            }
+        };
+
+        var removeKhassida = function (id) {
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this imaginary file!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '/ajax/pdf/'+id,
+                            type: 'DELETE',
+                            success: function(result) {
+                                if(result.success === true) {
+                                    $(".rm_"+id).parents('tr').remove();
+                                }
+                            }
+                        });
+                    }
+                });
+        };
+
+        $("#add_khassida").submit(function(e) {
+            e.preventDefault();
+
+            var name  = $("input[name='name']").val();
+            var type = $("select[name='type']").val();
+            var files = $('#file')[0].files[0];
+
+            if (name === '') {
+                $("#error").html("<div class='alert alert-danger' role='alert'>" +
+                    "<strong>Error !</strong> You must give the file name." +
+                    "</div>");
+
+                return;
+            }
+            if(!files) {
+                $("#error").html("<div class='alert alert-danger' role='alert'>" +
+                    "<strong>Error !</strong> You must select a pdf file." +
+                    "</div>");
+
+                return;
+            }
+
+            $("#addFileLoader").css('display', 'block');
+
+            var fd = new FormData();
+            fd.append('file', files);
+            fd.append('type', type);
+            fd.append('name', name);
+
+            $.ajax({
+                url         : '{{ path('app_adminajax_addpdf') }}',
+                data        : fd,
+                cache       : false,
+                contentType : false,
+                processData : false,
+                type        : 'POST',
+                enctype: 'multipart/form-data',
+                success     : function(data) {
+                    $("#error").html("<div class='alert alert-success' role='alert'>" +
+                        "<strong>Well done !</strong> the file was added successfully." +
+                        "</div>");
+                },
+                error        : function(error) {
+                    $("#error").html("<div class='alert alert-danger' role='alert'>" +
+                        "<strong>Error !</strong> Server error try later." +
+                        "</div>");
+                },
+            });
+        });
+
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
+
+    </script>
+{% endblock %}
