@@ -19,7 +19,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 class MemoryAuthenticator extends AbstractGuardAuthenticator
 {
     private const LOGIN_ROUTE = 'app_default_index';
-    private const ADMIN_ROUTE = 'app_admin_index';
+    private const ADMIN_ROUTE = 'app_default_admin';
 
     private $urlGenerator;
     private $csrfTokenManager;
