@@ -37,10 +37,7 @@ class KhassidatiController
      */
     public function pdfsByType(string $type, Request $request, PdfRepository $pdfRepository)
     {
-        $limit = (int) $request->get('limit', 50);
-        $offset = (int) $request->get('offset', 0);
-
-        $pdfs = $pdfRepository->findBy(['type'=> $type], ['id' => 'DESC'], $limit, $offset);
+        $pdfs = $pdfRepository->findBy(['type'=> $type], ['name' => 'ASC']);
 
         return new JsonResponse([
             'success' => true,
