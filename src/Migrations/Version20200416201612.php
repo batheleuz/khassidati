@@ -23,7 +23,6 @@ final class Version20200416201612 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE pdf (id INT AUTO_INCREMENT NOT NULL, type VARCHAR(50) NOT NULL, name VARCHAR(255) NOT NULL, file_name VARCHAR(255) NOT NULL, file_url VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('DROP TABLE School');
     }
 
     public function down(Schema $schema) : void
@@ -31,7 +30,6 @@ final class Version20200416201612 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('CREATE TABLE School (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(99) CHARACTER SET utf8 NOT NULL COLLATE `utf8_general_ci`, lastName VARCHAR(99) CHARACTER SET utf8 NOT NULL COLLATE `utf8_general_ci`, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
         $this->addSql('DROP TABLE pdf');
     }
 }

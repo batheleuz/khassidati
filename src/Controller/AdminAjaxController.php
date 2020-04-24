@@ -52,8 +52,11 @@ class AdminAjaxController
     /**
      * @Route("/ajax/pdf/{pdfId}", methods={"DELETE"})
      */
-    public function removePdf(int $pdfId, PdfRepository $pdfRepository)
-    {
+    public function removePdf(
+        int $pdfId,
+        PdfRepository $pdfRepository,
+        FileUploader $fileUploader
+    ) {
         $pdf = $pdfRepository->find($pdfId);
 
         try {
@@ -63,6 +66,10 @@ class AdminAjaxController
             return new JsonResponse([
                 'success' => false,
             ]);
+        }
+        try {
+            $fileUploader->deleteFile($pdf->getFileName());
+        } catch (\Exception $exception) {
         }
 
         return new JsonResponse([

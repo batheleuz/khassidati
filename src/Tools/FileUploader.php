@@ -24,4 +24,9 @@ final class FileUploader
 
         return $fileName;
     }
+
+    public function deleteFile(string $fileName)
+    {
+        unlink($this->targetDirectory.$fileName);
+    }
 }
