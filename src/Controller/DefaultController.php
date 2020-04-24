@@ -13,7 +13,15 @@ class DefaultController extends AbstractController
     /**
      * @Route("/", methods={"GET", "POST"})
      */
-    public function index(AuthenticationUtils $authenticationUtils, Security $security)
+    public function index()
+    {
+        return $this->render('index.html.twig');
+    }
+
+    /**
+     * @Route("/login", methods={"GET", "POST"})
+     */
+    public function login(AuthenticationUtils $authenticationUtils, Security $security)
     {
         if ($security->getUser() instanceof User) {
             return $this->forward("App\Controller\DefaultController::admin");
@@ -24,7 +32,7 @@ class DefaultController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('index.html.twig', [
+        return $this->render('login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error
         ]);
